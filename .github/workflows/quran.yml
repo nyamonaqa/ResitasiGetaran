@@ -1,0 +1,37 @@
+name: QuranDigital
+
+on:
+  schedule:
+    # Berjalan setiap jam 21:00 UTC (jam 04:00 subuh WIB)
+    - cron: '0 21 * * *' 
+  workflow_dispatch: # Tombol manual jika ingin jalan sekarang
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Lib
+        run: pip install requests
+
+      - name: Run Bot
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        run: python quran.py
+
+      - name: Auto Commit
+        run: |
+          git config --global user.name "HambaDigital"
+          git config --global user.email "bot@github.com"
+          git add kehadiran.txt riwayat.txt progres.txt
+          git commit -m "Update Laporan"
+          git push
